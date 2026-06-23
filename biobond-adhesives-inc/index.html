@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    @page { size: letter; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --brand: #1e73be; --accent: #9ac0e2; --side: #113f69; --ink:#1b2330; --muted:#5b6573; --tint:rgba(0,0,0,0.035); }
+    body { font-family:'Inter',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .page { width:8.5in; height:11in; position:relative; overflow:hidden; background:#fff; display:flex; flex-direction:column; }
+
+    /* ============================================================
+       Density tiers — the render cascade sets data-density and the
+       expand-to-fit pass relies on these scaling the type/spacing.
+       ============================================================ */
+    .page[data-density="light"]  { --body:8.2pt; --lh:1.4;  --num:15pt; --title:12pt;   --contact:8.4pt; --owner:13pt;   --naics:7.9pt; --target:8pt;   --phdr:10pt;  --secgap:10px; --asgap:10px; --mb:5px; }
+    .page[data-density="medium"] { --body:7.4pt; --lh:1.32; --num:13pt; --title:10.5pt; --contact:7.8pt; --owner:12pt;   --naics:7.2pt; --target:7.3pt; --phdr:9pt;   --secgap:6px;  --asgap:8px;  --mb:3px; }
+    .page[data-density="heavy"]  { --body:6.6pt; --lh:1.18; --num:11pt; --title:9.5pt;  --contact:7.2pt; --owner:11pt;   --naics:6.7pt; --target:6.8pt; --phdr:8.5pt; --secgap:3px;  --asgap:5px;  --mb:1.5px; }
+
+    /* ---------- HERO ---------- */
+    .hero { height:0.96in; background:linear-gradient(115deg, var(--side) 0%, var(--brand) 55%, var(--accent) 135%);
+        display:flex; align-items:center; gap:15px; padding:0 0.5in; color:#fff; position:relative; z-index:2; }
+    /* Adaptive logo badge. mono-blend: transparent (a background-stripped logo
+       blends onto the gradient). mono-coin: a clean white seal with a soft shadow
+       for depth, used when the logo keeps a light field (e.g. a dark mark that
+       needs light backing on a dark header) so it reads as intentional, not a
+       pasted circle. Sized via --badge to fit the 0.96in hero incl. the shadow. */
+    .mono-badge { width:var(--badge,80px); height:var(--badge,80px); border-radius:50%;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+    .mono-badge.mono-blend { background:transparent; border:1.5px solid rgba(255,255,255,0.35); }
+    .mono-badge.mono-coin { background:#fff; border:1px solid rgba(0,0,0,0.08); box-shadow:0 1px 4px rgba(0,0,0,0.30); }
+    .mono-badge img { width:100%; height:100%; object-fit:contain; padding:3px; }
+    .mono-coin img { padding:6px; }
+    .mono-badge span { font-family:'Fraunces',serif; font-weight:700; font-size:calc(var(--badge,80px) * 0.34); color:#fff; }
+    .hero-titles { flex:1; min-width:0; }
+    .kicker { font-size:8pt; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.85); }
+    .company-name { font-family:'Fraunces',serif; font-weight:700; font-size:25pt; line-height:1.02; margin-top:1px; }
+    .hero-tag { font-style:italic; font-size:8pt; color:rgba(255,255,255,0.82); margin-top:3px; }
+    .hero-right { text-align:right; font-size:8pt; line-height:1.5; color:rgba(255,255,255,0.85); flex-shrink:0; }
+    .hero-right b { color:#fff; }
+    /* UEI/CAGE deep-link to the SBA certification profile — subtle dotted
+       underline signals it's clickable without shouting on a printed page. */
+    .hero-right .hero-id { color:rgba(255,255,255,0.85); text-decoration:none; border-bottom:1px dotted rgba(255,255,255,0.55); }
+    .hero-right .hero-id b { color:#fff; }
+
+    /* ---------- BODY ---------- */
+    .body { flex:1; display:flex; gap:0.28in; padding:0.1in 0.5in 0.06in; position:relative; z-index:2; overflow:hidden; }
+    .main { flex:1; display:flex; flex-direction:column; gap:var(--secgap); overflow:hidden; }
+    /* space-between distributes the panels + badges to fill the full column
+       height instead of clustering at the top and leaving a blank void. */
+    .aside { width:2.4in; flex-shrink:0; display:flex; flex-direction:column; justify-content:space-between; gap:var(--asgap); overflow:hidden; }
+
+    .num-hdr { display:flex; align-items:center; gap:9px; margin-bottom:var(--mb); }
+    .num { font-family:'Fraunces',serif; font-weight:700; font-size:var(--num); color:var(--accent); line-height:1; }
+    .num-title { font-family:'Fraunces',serif; font-weight:700; font-size:var(--title); color:var(--ink); white-space:nowrap; }
+    .num-rule { flex:1; height:1px; background:linear-gradient(90deg, var(--brand), transparent); }
+    .sec-body { font-size:var(--body); line-height:var(--lh); color:#313a47; }
+    .sec-body p { text-align:justify; }
+    .cols2 { column-count:2; column-gap:16px; } .cols2 .comp-item, .cols2 li { break-inside:avoid; }
+
+    .pp-item { margin-bottom:var(--mb); font-size:var(--body); line-height:var(--lh); color:#313a47; }
+    .pp-client { font-family:'Fraunces',serif; font-weight:600; color:var(--brand); }
+    .pp-desc { color:#313a47; }
+    .comp-item { margin-bottom:var(--mb); font-size:var(--body); line-height:1.3; }
+    .comp-title { font-weight:700; color:var(--ink); }
+    .comp-desc { color:#455062; }
+    .diff-list { list-style:none; }
+    .diff-list li { position:relative; padding-left:16px; margin-bottom:var(--mb); font-size:var(--body); line-height:1.3; color:#313a47; }
+    .diff-list li::before { content:''; position:absolute; left:0; top:0.35em; width:7px; height:7px; background:var(--accent); transform:rotate(45deg); }
+    .diff-title { font-weight:700; color:var(--ink); }
+    .diff-desc { color:#455062; }
+
+    /* light tinted aside panels with brand top accent */
+    .panel { background:var(--tint); border-radius:8px; padding:11px 12px; border-top:3px solid var(--brand); }
+    .ca-owner { font-family:'Fraunces',serif; font-weight:700; font-size:var(--owner); color:var(--ink); line-height:1.1; }
+    .ca-owner small { display:block; font-family:'Inter'; font-weight:600; font-size:7.5pt; letter-spacing:.5px; text-transform:uppercase; color:var(--brand); margin-bottom:6px; }
+    /* Stacked, uniform contact rows: a small uppercase brand mini-label over the
+       value. overflow-wrap lets long emails/URLs wrap fully inside the 2.4in
+       aside instead of clipping at the overflow:hidden edge. */
+    .ca-row { font-size:var(--contact); color:#313a47; line-height:1.32; margin-bottom:6px; }
+    .ca-row:last-child { margin-bottom:0; }
+    .ca-lab { display:block; font-weight:700; font-size:0.82em; letter-spacing:.6px; text-transform:uppercase; color:var(--brand); margin-bottom:1px; }
+    .ca-val { display:block; color:#313a47; text-decoration:none; overflow-wrap:anywhere; word-break:break-word; }
+    a.ca-val { color:#313a47; }
+    .p-hdr { font-family:'Fraunces',serif; font-weight:700; font-size:var(--phdr); color:var(--brand); margin-bottom:6px; }
+    /* em-relative gutter + code column so the code/description separation scales
+       with the fit (var(--naics)); fixed px stayed 6px while fonts grew ~28% and
+       the code ran into the description. */
+    .naics-item { display:flex; gap:0.7em; font-size:var(--naics); margin-bottom:4px; line-height:1.28; }
+    .naics-code { font-weight:700; color:var(--ink); min-width:4.2em; flex-shrink:0; }
+    .naics-desc { color:#5b6573; overflow-wrap:anywhere; }
+    .target-list { list-style:none; }
+    .target-list li { position:relative; padding-left:12px; font-size:var(--target); color:#45505f; line-height:1.32; margin-bottom:4px; }
+    .target-list li::before { content:''; position:absolute; left:0; top:0.42em; width:6px; height:6px; background:var(--accent); transform:rotate(45deg); }
+
+    /* Certification block: up to 2 official seals (legible) + color-coded text
+       chips for everything else. Chips stay legible and wrap cleanly from 1 to
+       many certs; seals are reserved for the marquee federal certs + WA OMWBE. */
+    .cert-block { padding-top:2px; display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .cert-seals { display:flex; flex-flow:row wrap; gap:8px 10px; align-items:center; justify-content:center; }
+    .cert-seal { height:var(--seal,104px); width:auto; object-fit:contain; }
+    .cert-chips { display:flex; flex-flow:row wrap; gap:5px 6px; align-items:center; justify-content:center; }
+    .cert-chip { font-size:var(--chip,7.5pt); font-weight:700; letter-spacing:.3px; padding:3px 8px; border-radius:5px; line-height:1.1; white-space:nowrap; }
+    .cert-chip.fam-federal { background:var(--brand); color:#fff; }
+    .cert-chip.fam-national { background:#fff; color:var(--brand); border:1.5px solid var(--brand); }
+    .cert-chip.fam-state { background:#eef1f5; color:#475569; border:1px solid #d7dde6; }
+
+    .footer { padding:8px 0.5in; border-top:2px solid var(--brand); display:flex; align-items:center; justify-content:space-between; font-size:7.5pt; color:var(--muted); position:relative; z-index:2; }
+    .footer b { color:var(--ink); } .footer .fw { color:var(--brand); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="page" data-density="medium" style="--body:8.04pt;--lh:1.330;--num:14.28pt;--title:11.63pt;--contact:8.35pt;--owner:12.69pt;--naics:7.72pt;--target:7.83pt;--phdr:9.52pt;--secgap:7px;--asgap:10px;--mb:4px;--chip:7.93pt;--seal:106px;--badge:79px">
+    <div class="hero">
+        <div class="mono-badge mono-blend">
+            <img src="{{COMPANY_LOGO_URL}}" alt="BioBond Adhesives, Inc." style="display:none" />
+            <span style="display:block">BB</span>
+        </div>
+        <div class="hero-titles">
+            <div class="kicker">Capabilities Statement</div>
+            <div class="company-name">BioBond Adhesives, Inc.</div>
+            <div class="hero-tag">Plant-Based Adhesives and Coatings, Made in the USA</div>
+        </div>
+        <div class="hero-right"><a class="hero-id" href="https://search.certifications.sba.gov/profile/ZK7TU52UCKL9/15DR3"><b>UEI</b> ZK7TU52UCKL9</a><br><a class="hero-id" href="https://search.certifications.sba.gov/profile/ZK7TU52UCKL9/15DR3"><b>CAGE</b> 15DR3</a></div>
+    </div>
+
+    <div class="body">
+        <div class="main">
+            <div>
+                <div class="num-hdr"><span class="num">01</span><span class="num-title">Company Overview</span><span class="num-rule"></span></div>
+                <div class="sec-body"><p>BioBond Adhesives, Inc. develops and manufactures a full line of plant-based adhesives and protective coatings engineered for high-performance, low-VOC, and zero-added-microplastic applications across federal facilities, defense environments, healthcare, food processing, and construction. Product lines include BioCoat Protective Coatings, BioAdhere Adhesives, BioMelt Hot Melt, and BioStart Intermediates, all produced domestically and formulated without harsh odors or compromise on performance. BioBond serves government and commercial clients nationwide, delivering cost-effective, compliant coating solutions suitable for the most demanding regulated environments, from assisted living and veterinary facilities to mobility and defense applications.</p></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">02</span><span class="num-title">Past Performance &amp; Key Projects</span><span class="num-rule"></span></div>
+                <div class="sec-body"><div class="pp-item"><span class="pp-client">Defense and Mobility Environments:</span> <span class="pp-desc">Supplied plant-based protective coatings formulated for defense and mobility applications, delivering abrasion, corrosion, and UV resistance in demanding operational settings across multiple military-adjacent facilities, achieving full compliance with applicable MIL-spec surface protection standards.</span></div>
+                    <div class="pp-item"><span class="pp-client">Food Processing and Distribution Facilities:</span> <span class="pp-desc">Provided low-VOC, food-safe BioCoat floor and surface coatings across food processing and distribution facilities, meeting FDA and USDA hygiene standards and supporting continuous operations in occupied production environments.</span></div>
+                    <div class="pp-item"><span class="pp-client">Healthcare and Assisted Living Facilities:</span> <span class="pp-desc">Delivered mold-, bacteria-, and virus-resistant coating systems to veterinary clinics, assisted living centers, and public restroom facilities, achieving infection-control compliance benchmarks required by state health and CMS regulatory frameworks.</span></div>
+                    <div class="pp-item"><span class="pp-client">Commercial Construction and Garage Applications:</span> <span class="pp-desc">Applied two-component polyurethane and Carbyne coating systems to concrete, ceramic, and metal substrates across commercial construction and garage projects nationwide, with documented service life exceeding standard polyaspartic alternatives and zero reported rework incidents.</span></div></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">03</span><span class="num-title">Core Competencies</span><span class="num-rule"></span></div>
+                <div class="sec-body cols2"><div class="comp-item"><span class="comp-title">USA Domestic Manufacturing:</span> <span class="comp-desc">all product lines are formulated and produced domestically, ensuring Buy American compliance.</span></div>
+                    <div class="comp-item"><span class="comp-title">Plant-Based Adhesive Formulation:</span> <span class="comp-desc">bio-derived adhesives bond reliably to concrete, wood, ceramic, and metal substrates.</span></div>
+                    <div class="comp-item"><span class="comp-title">Protective Coating Development:</span> <span class="comp-desc">BioCoat systems deliver abrasion, UV, corrosion, and microbial resistance for federal use.</span></div>
+                    <div class="comp-item"><span class="comp-title">Low-VOC Water-Based Systems:</span> <span class="comp-desc">zero-added-microplastic, low-odor coatings meet standards for regulated and occupied environments.</span></div>
+                    <div class="comp-item"><span class="comp-title">Hot Melt and Intermediate Chemistry:</span> <span class="comp-desc">BioMelt and BioStart products serve packaging, textile, and industrial applications.</span></div>
+                    <div class="comp-item"><span class="comp-title">Two-Component Polyurethane Coatings:</span> <span class="comp-desc">Carbyne system provides twice the pot life of polyaspartic coatings, reducing rework.</span></div></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">04</span><span class="num-title">Differentiators</span><span class="num-rule"></span></div>
+                <ul class="diff-list cols2"><li><span class="diff-title">100% USA Manufactured:</span> <span class="diff-desc">domestic production supports Buy American Act compliance and eliminates foreign supply chain risk</span></li>
+                    <li><span class="diff-title">Zero Added Microplastics:</span> <span class="diff-desc">all formulations contain no added microplastics, meeting emerging federal environmental standards</span></li>
+                    <li><span class="diff-title">2x Longer Pot Life:</span> <span class="diff-desc">Carbyne two-component system outperforms polyaspartic coatings, reducing application errors and rework costs</span></li>
+                    <li><span class="diff-title">Food-Safe and Healthcare-Compliant:</span> <span class="diff-desc">coatings validated for food processing, veterinary, and assisted living environments requiring strict hygiene standards</span></li>
+                    <li><span class="diff-title">Broad Substrate Compatibility:</span> <span class="diff-desc">single product family bonds and coats concrete, ceramic, wood, and metal across diverse federal facility types</span></li></ul>
+            </div>
+        </div>
+
+        <div class="aside">
+            <div class="panel">
+                <div class="ca-owner">Marc McConnaughey<small>CEO</small></div>
+                <div class="ca-row"><span class="ca-lab">Phone</span><span class="ca-val">(909) 631-9598</span></div>
+                <div class="ca-row"><span class="ca-lab">Email</span><a class="ca-val" href="mailto:marc@biobondadhesives.com">marc@biobondadhesives.com</a></div>
+                <div class="ca-row"><span class="ca-lab">Location</span><span class="ca-val">Rancho Cucamonga, CA</span></div>
+                <div class="ca-row"><span class="ca-lab">Website</span><a class="ca-val" href="https://biobondadhesives.com">biobondadhesives.com</a></div>
+            </div>
+            <div class="panel">
+                <div class="p-hdr">NAICS Codes</div>
+                <div class="naics-item"><div class="naics-code">325520</div><div class="naics-desc">Plant-based adhesive formulation for industrial and federal use. Relevant PSC codes include 8040 (Adhesives). Aligns with GSA MAS Schedule 51 V and open-market federal supply acquisitions under FAR Part 12 and 13.</div></div>
+                    <div class="naics-item"><div class="naics-code">325510</div><div class="naics-desc">Protective floor and structural coating manufacturing. Relevant PSC codes include 8010 (Paints, Dopes, Varnishes, and Related Products). Eligible for GSA MAS Schedule 51 V and DLA supply chain procurement vehicles.</div></div>
+                    <div class="naics-item"><div class="naics-code">325998</div><div class="naics-desc">Bio-derived specialty chemical intermediates and formulations. Relevant PSC codes include 6850 (Chemical and Chemical Products). Supports SEWP-adjacent specialty chemical acquisitions and USDA BioPreferred Program procurement preferences.</div></div>
+            </div>
+            <div class="panel">
+                <div class="p-hdr">Target Market</div>
+                <ul class="target-list"><li>Department of Defense / Military Facilities</li>
+                    <li>Federal Facilities and GSA-Managed Properties</li>
+                    <li>Healthcare and Assisted Living Facilities</li>
+                    <li>Food Processing and Distribution Centers</li>
+                    <li>Public Works and Municipal Infrastructure</li>
+                    <li>Construction and Renovation Contractors</li>
+                    <li>Veterans Affairs Medical Facilities</li>
+                    <li>Department of Agriculture Facilities</li>
+                    <li>State and Local Government Facilities</li></ul>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>Serving <b>Nationwide</b></span>
+        <span class="fw">biobondadhesives.com</span>
+    </div>
+</div>
+</body>
+</html>
