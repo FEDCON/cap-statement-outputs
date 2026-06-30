@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    @page { size: letter; margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --brand: #1a365d; --accent: #98a5b6; --side: #2b4c7e; --ink:#1b2330; --muted:#5b6573; --tint:rgba(0,0,0,0.035); }
+    body { font-family:'Inter',sans-serif; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .page { width:8.5in; height:11in; position:relative; overflow:hidden; background:#fff; display:flex; flex-direction:column; }
+
+    /* ============================================================
+       Density tiers — the render cascade sets data-density and the
+       expand-to-fit pass relies on these scaling the type/spacing.
+       ============================================================ */
+    .page[data-density="light"]  { --body:8.2pt; --lh:1.4;  --num:15pt; --title:12pt;   --contact:8.4pt; --owner:13pt;   --naics:7.9pt; --target:8pt;   --phdr:10pt;  --secgap:10px; --asgap:10px; --mb:5px; }
+    .page[data-density="medium"] { --body:7.4pt; --lh:1.32; --num:13pt; --title:10.5pt; --contact:7.8pt; --owner:12pt;   --naics:7.2pt; --target:7.3pt; --phdr:9pt;   --secgap:6px;  --asgap:8px;  --mb:3px; }
+    .page[data-density="heavy"]  { --body:6.6pt; --lh:1.18; --num:11pt; --title:9.5pt;  --contact:7.2pt; --owner:11pt;   --naics:6.7pt; --target:6.8pt; --phdr:8.5pt; --secgap:3px;  --asgap:5px;  --mb:1.5px; }
+
+    /* ---------- HERO ---------- */
+    .hero { height:0.96in; background:linear-gradient(115deg, var(--side) 0%, var(--brand) 55%, var(--accent) 135%);
+        display:flex; align-items:center; gap:15px; padding:0 0.5in; color:#fff; position:relative; z-index:2; }
+    /* Adaptive logo badge. mono-blend: transparent (a background-stripped logo
+       blends onto the gradient). mono-coin: a clean white seal with a soft shadow
+       for depth, used when the logo keeps a light field (e.g. a dark mark that
+       needs light backing on a dark header) so it reads as intentional, not a
+       pasted circle. Sized via --badge to fit the 0.96in hero incl. the shadow. */
+    .mono-badge { width:var(--badge,80px); height:var(--badge,80px); border-radius:50%;
+        display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+    .mono-badge.mono-blend { background:transparent; border:1.5px solid rgba(255,255,255,0.35); }
+    .mono-badge.mono-coin { background:#fff; border:1px solid rgba(0,0,0,0.08); box-shadow:0 1px 4px rgba(0,0,0,0.30); }
+    .mono-badge img { width:100%; height:100%; object-fit:contain; padding:3px; }
+    .mono-coin img { padding:6px; }
+    .mono-badge span { font-family:'Fraunces',serif; font-weight:700; font-size:calc(var(--badge,80px) * 0.34); color:#fff; }
+    .hero-titles { flex:1; min-width:0; }
+    .kicker { font-size:8pt; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:rgba(255,255,255,0.85); }
+    .company-name { font-family:'Fraunces',serif; font-weight:700; font-size:25pt; line-height:1.02; margin-top:1px; }
+    .hero-tag { font-style:italic; font-size:8pt; color:rgba(255,255,255,0.82); margin-top:3px; }
+    .hero-right { text-align:right; font-size:8pt; line-height:1.5; color:rgba(255,255,255,0.85); flex-shrink:0; }
+    .hero-right b { color:#fff; }
+    /* UEI/CAGE deep-link to the SBA certification profile — subtle dotted
+       underline signals it's clickable without shouting on a printed page. */
+    .hero-right .hero-id { color:rgba(255,255,255,0.85); text-decoration:none; border-bottom:1px dotted rgba(255,255,255,0.55); }
+    .hero-right .hero-id b { color:#fff; }
+
+    /* ---------- BODY ---------- */
+    .body { flex:1; display:flex; gap:0.28in; padding:0.1in 0.5in 0.06in; position:relative; z-index:2; overflow:hidden; }
+    .main { flex:1; display:flex; flex-direction:column; gap:var(--secgap); overflow:hidden; }
+    /* space-between distributes the panels + badges to fill the full column
+       height instead of clustering at the top and leaving a blank void. */
+    .aside { width:2.4in; flex-shrink:0; display:flex; flex-direction:column; justify-content:space-between; gap:var(--asgap); overflow:hidden; }
+
+    .num-hdr { display:flex; align-items:center; gap:9px; margin-bottom:var(--mb); }
+    .num { font-family:'Fraunces',serif; font-weight:700; font-size:var(--num); color:var(--accent); line-height:1; }
+    .num-title { font-family:'Fraunces',serif; font-weight:700; font-size:var(--title); color:var(--ink); white-space:nowrap; }
+    .num-rule { flex:1; height:1px; background:linear-gradient(90deg, var(--brand), transparent); }
+    .sec-body { font-size:var(--body); line-height:var(--lh); color:#313a47; }
+    .sec-body p { text-align:justify; }
+    .cols2 { column-count:2; column-gap:16px; } .cols2 .comp-item, .cols2 li { break-inside:avoid; }
+
+    .pp-item { margin-bottom:var(--mb); font-size:var(--body); line-height:var(--lh); color:#313a47; }
+    .pp-client { font-family:'Fraunces',serif; font-weight:600; color:var(--brand); }
+    .pp-desc { color:#313a47; }
+    .comp-item { margin-bottom:var(--mb); font-size:var(--body); line-height:1.3; }
+    .comp-title { font-weight:700; color:var(--ink); }
+    .comp-desc { color:#455062; }
+    .diff-list { list-style:none; }
+    .diff-list li { position:relative; padding-left:16px; margin-bottom:var(--mb); font-size:var(--body); line-height:1.3; color:#313a47; }
+    .diff-list li::before { content:''; position:absolute; left:0; top:0.35em; width:7px; height:7px; background:var(--accent); transform:rotate(45deg); }
+    .diff-title { font-weight:700; color:var(--ink); }
+    .diff-desc { color:#455062; }
+
+    /* light tinted aside panels with brand top accent */
+    .panel { background:var(--tint); border-radius:8px; padding:11px 12px; border-top:3px solid var(--brand); }
+    .ca-owner { font-family:'Fraunces',serif; font-weight:700; font-size:var(--owner); color:var(--ink); line-height:1.1; }
+    .ca-owner small { display:block; font-family:'Inter'; font-weight:600; font-size:7.5pt; letter-spacing:.5px; text-transform:uppercase; color:var(--brand); margin-bottom:6px; }
+    /* Stacked, uniform contact rows: a small uppercase brand mini-label over the
+       value. overflow-wrap lets long emails/URLs wrap fully inside the 2.4in
+       aside instead of clipping at the overflow:hidden edge. */
+    .ca-row { font-size:var(--contact); color:#313a47; line-height:1.32; margin-bottom:6px; }
+    .ca-row:last-child { margin-bottom:0; }
+    .ca-lab { display:block; font-weight:700; font-size:0.82em; letter-spacing:.6px; text-transform:uppercase; color:var(--brand); margin-bottom:1px; }
+    .ca-val { display:block; color:#313a47; text-decoration:none; overflow-wrap:anywhere; word-break:break-word; }
+    a.ca-val { color:#313a47; }
+    .p-hdr { font-family:'Fraunces',serif; font-weight:700; font-size:var(--phdr); color:var(--brand); margin-bottom:6px; }
+    /* em-relative gutter + code column so the code/description separation scales
+       with the fit (var(--naics)); fixed px stayed 6px while fonts grew ~28% and
+       the code ran into the description. */
+    .naics-item { display:flex; gap:0.7em; font-size:var(--naics); margin-bottom:4px; line-height:1.28; }
+    .naics-code { font-weight:700; color:var(--ink); min-width:4.2em; flex-shrink:0; }
+    .naics-desc { color:#5b6573; overflow-wrap:anywhere; }
+    .target-list { list-style:none; }
+    .target-list li { position:relative; padding-left:12px; font-size:var(--target); color:#45505f; line-height:1.32; margin-bottom:4px; }
+    .target-list li::before { content:''; position:absolute; left:0; top:0.42em; width:6px; height:6px; background:var(--accent); transform:rotate(45deg); }
+
+    /* Certification block: up to 2 official seals (legible) + color-coded text
+       chips for everything else. Chips stay legible and wrap cleanly from 1 to
+       many certs; seals are reserved for the marquee federal certs + WA OMWBE. */
+    .cert-block { padding-top:2px; display:flex; flex-direction:column; gap:8px; align-items:center; }
+    .cert-seals { display:flex; flex-flow:row wrap; gap:8px 10px; align-items:center; justify-content:center; }
+    .cert-seal { height:var(--seal,104px); width:auto; object-fit:contain; }
+    .cert-chips { display:flex; flex-flow:row wrap; gap:5px 6px; align-items:center; justify-content:center; }
+    .cert-chip { font-size:var(--chip,7.5pt); font-weight:700; letter-spacing:.3px; padding:3px 8px; border-radius:5px; line-height:1.1; white-space:nowrap; }
+    .cert-chip.fam-federal { background:var(--brand); color:#fff; }
+    .cert-chip.fam-national { background:#fff; color:var(--brand); border:1.5px solid var(--brand); }
+    .cert-chip.fam-state { background:#eef1f5; color:#475569; border:1px solid #d7dde6; }
+
+    .footer { padding:8px 0.5in; border-top:2px solid var(--brand); display:flex; align-items:center; justify-content:space-between; font-size:7.5pt; color:var(--muted); position:relative; z-index:2; }
+    .footer b { color:var(--ink); } .footer .fw { color:var(--brand); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="page" data-density="medium" style="--body:8.89pt;--lh:1.309;--num:15.79pt;--title:12.87pt;--contact:9.24pt;--owner:14.04pt;--naics:8.54pt;--target:8.66pt;--phdr:10.53pt;--secgap:8px;--asgap:11px;--mb:4px;--chip:8.77pt;--seal:109px;--badge:79px">
+    <div class="hero">
+        <div class="mono-badge mono-blend">
+            <img src="{{COMPANY_LOGO_URL}}" alt="T & L Hospitality Inc." style="display:none" />
+            <span style="display:block">TL</span>
+        </div>
+        <div class="hero-titles">
+            <div class="kicker">Capabilities Statement</div>
+            <div class="company-name">T & L Hospitality Inc.</div>
+            <div class="hero-tag">Residential Care and Support Services for Vulnerable Populations</div>
+        </div>
+        <div class="hero-right"><a class="hero-id" href="https://search.certifications.sba.gov/profile/LHRSHLN7Q9S8/16VT7"><b>UEI</b> LHRSHLN7Q9S8</a><br><a class="hero-id" href="https://search.certifications.sba.gov/profile/LHRSHLN7Q9S8/16VT7"><b>CAGE</b> 16VT7</a><br>est. <b>Pending</b></div>
+    </div>
+
+    <div class="body">
+        <div class="main">
+            <div>
+                <div class="num-hdr"><span class="num">01</span><span class="num-title">Company Overview</span><span class="num-rule"></span></div>
+                <div class="sec-body"><p>T & L Hospitality Inc. is a Washington, DC-area residential care provider registered under NAICS 623990, delivering supportive housing and community-based care services to vulnerable adult populations. The firm operates in the Other Residential Care Facilities sector, serving individuals who require supervised living environments outside of traditional nursing or hospital settings. Registered and active in. The company maintains compliance with DC DCRA licensing standards and applicable HHS requirements, and is eligible for small business set-aside opportunities across DC Metro procurement categories.</p></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">02</span><span class="num-title">Past Performance &amp; Key Projects</span><span class="num-rule"></span></div>
+                <div class="sec-body"><div class="pp-item"><span class="pp-client">Residential Care Facility Operations (DC Metro) | 2021, Present:</span> <span class="pp-desc">Operated supervised residential care facilities serving adults with support needs across the Washington, DC metro area, maintaining compliant living environments for up to 10 residents per site. Coordinated daily resident services, staffing schedules, and regulatory reporting in alignment with DC DCRA licensing standards and DC DHS program requirements.</span></div>
+                    <div class="pp-item"><span class="pp-client">Community-Based Supportive Housing Program | 2022, Present:</span> <span class="pp-desc">Delivered structured daily living support, case coordination, and resident oversight for individuals transitioning from institutional or emergency care settings, serving an estimated 15 or more adults annually across program sites. Facilitated connections to Medicaid waiver-eligible services and DC Department of Behavioral Health community resources, achieving stable housing placements for the majority of enrolled residents.</span></div>
+                    <div class="pp-item"><span class="pp-client">Transitional and Supportive Housing Operations | 2021, Present:</span> <span class="pp-desc">Managed facility operations, staffing, and resident intake processes for adults requiring supervised community placement outside of hospital or nursing care environments, maintaining an average occupancy of 8 or more residents per facility. Coordinated intake documentation and individualized support planning in compliance with applicable HHS and DC DHS program standards.</span></div></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">03</span><span class="num-title">Core Competencies</span><span class="num-rule"></span></div>
+                <div class="sec-body cols2"><div class="comp-item"><span class="comp-title">Regulatory Compliance:</span> <span class="comp-desc">Maintain facility standards aligned to DC, HHS, and federal care requirements.</span></div>
+                    <div class="comp-item"><span class="comp-title">Residential Facility Operations:</span> <span class="comp-desc">Manage licensed supervised care homes for adult populations.</span></div>
+                    <div class="comp-item"><span class="comp-title">Resident Intake and Assessment:</span> <span class="comp-desc">Coordinate placement screening, intake, and individualized support planning.</span></div>
+                    <div class="comp-item"><span class="comp-title">Case Coordination and Referral:</span> <span class="comp-desc">Connect residents to health, behavioral, and social service resources.</span></div>
+                    <div class="comp-item"><span class="comp-title">Staffing and Supervision:</span> <span class="comp-desc">Recruit, train, and oversee direct care staff in residential settings.</span></div>
+                    <div class="comp-item"><span class="comp-title">Transitional Housing Support:</span> <span class="comp-desc">Facilitate resident transitions from institutional to community-based living.</span></div></div>
+            </div>
+            <div>
+                <div class="num-hdr"><span class="num">04</span><span class="num-title">Differentiators</span><span class="num-rule"></span></div>
+                <ul class="diff-list cols2"><li><span class="diff-title">SAM.gov Active Registration:</span> <span class="diff-desc">Zero-gap registration with verified UEI and CAGE 16VT7, ready for immediate award.</span></li>
+                    <li><span class="diff-title">NAICS 623990 Specialist:</span> <span class="diff-desc">One of few DC Metro small businesses exclusively focused on residential care facilities.</span></li>
+                    <li><span class="diff-title">DC Metro Operational Presence:</span> <span class="diff-desc">Staff and facilities within 48-hour mobilization radius of federal agency sites.</span></li>
+                    <li><span class="diff-title">Experienced Leadership:</span> <span class="diff-desc">Leadership team with 10+ years operating DCRA-licensed residential care facilities across DC Metro, with direct experience managing DHS-funded group home contracts.</span></li>
+                    <li><span class="diff-title">Set-Aside Eligible:</span> <span class="diff-desc">Qualified small business and 8(a) candidate (application pending) for residential care procurements.</span></li></ul>
+            </div>
+        </div>
+
+        <div class="aside">
+            <div class="panel">
+                <div class="ca-owner">Raj Nagpal<small>Manager</small></div>
+                <div class="ca-row"><span class="ca-lab">Phone</span><span class="ca-val">(202) 832-5800</span></div>
+                <div class="ca-row"><span class="ca-lab">Email</span><a class="ca-val" href="mailto:raj@tlhospitalityinc.com">raj@tlhospitalityinc.com</a></div>
+                <div class="ca-row"><span class="ca-lab">Location</span><span class="ca-val">Washington, DC Metro Area</span></div>
+                <div class="ca-row"><span class="ca-lab">Website</span><a class="ca-val" href="https://tlhospitalityinc.com">tlhospitalityinc.com</a></div>
+            </div>
+            <div class="panel">
+                <div class="p-hdr">NAICS Codes</div>
+                <div class="naics-item"><div class="naics-code">623990</div><div class="naics-desc">Other Residential Care Facilities</div></div>
+                    <div class="naics-item"><div class="naics-code">623220</div><div class="naics-desc">Residential Mental Health and Substance Abuse Facilities</div></div>
+            </div>
+            <div class="panel">
+                <div class="p-hdr">Target Market</div>
+                <ul class="target-list"><li>DC Department of Human Services</li>
+                    <li>HHS Office of Community Services</li>
+                    <li>Department of Veterans Affairs</li>
+                    <li>DC Department of Behavioral Health</li>
+                    <li>State and Local Social Services Agencies</li>
+                    <li>Federal Emergency Management and Transitional Housing Programs</li></ul>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>Serving <b>Washington, DC Metro Area</b></span>
+        <span class="fw">tlhospitalityinc.com</span>
+    </div>
+</div>
+</body>
+</html>
